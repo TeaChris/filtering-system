@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "seed": "pnpm tsx ./src/db/seed.ts",
     "start": "next start",
     "lint": "next lint"
   },
