@@ -13,6 +13,14 @@ import { ChevronDown, Filter } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
+import axios from 'axios'
+import { useQuery } from '@tanstack/react-query'
+import { QueryResult } from '@upstash/vector'
+import type { Product as TProduct } from '@/db'
+import Product from '@/components/Products/Product'
+import EmptyState from '@/components/Products/EmptyState'
+import ProductSkeleton from '@/components/Products/ProductSkeleton'
+
 // define constants in UPPERCASE
 const SORT_OPTIONS = [
   { name: 'None', value: 'none' },
@@ -24,9 +32,30 @@ export default function Home() {
   const [filter, setFilter] = useState({
     // color: ['beige', 'blue', 'green', 'purple', 'white'],
     // price: { isCustom: false, range: DEFAULT_CUSTOM_PRICE },
-    size: ['L', 'M', 'S'],
+    // size: ['L', 'M', 'S'],
     sort: 'none',
   })
+
+  const { data: products, refetch } = useQuery({
+    queryKey: ['products'],
+    queryFn: async () => {
+      const { data } = await axios.post<QueryResult<TProduct>[]>(
+        'http://localhost:3001/api/products',
+        {
+          filter: {
+            sort: filter.sort,
+            // color: filter.color,
+            // price: filter.price.range,
+            // size: filter.size,
+          },
+        }
+      )
+
+      return data
+    },
+  })
+
+  console.log(products)
 
   return (
     <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -87,6 +116,21 @@ export default function Home() {
               ))} */}
             </ul>
           </div>
+
+          {/* Product grid */}
+          <ul className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+            {products && products.length === 0 ? (
+              <EmptyState />
+            ) : products ? (
+              products.map((product) => (
+                <Product product={product.metadata!} key={product.id} />
+              ))
+            ) : (
+              new Array(12)
+                .fill(null)
+                .map((_, i) => <ProductSkeleton key={i} />)
+            )}
+          </ul>
         </div>
       </section>
     </main>
