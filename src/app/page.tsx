@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import { Slider } from '@/components/ui/slider'
 import {
@@ -28,6 +28,8 @@ import Product from '@/components/Products/Product'
 import EmptyState from '@/components/Products/EmptyState'
 import ProductSkeleton from '@/components/Products/ProductSkeleton'
 import { ProductState } from '@/lib/validators/product-validator'
+
+import debounce from 'lodash.debounce'
 
 // define constants in UPPERCASE
 const SORT_OPTIONS = [
@@ -111,6 +113,11 @@ export default function Home() {
     },
   })
 
+  const onSubmit = () => refetch()
+
+  const debouncedSubmit = debounce(onSubmit, 400)
+  const _debouncedSubmit = useCallback(debouncedSubmit, [])
+
   const applyArrayFilter = ({
     category,
     value,
@@ -132,7 +139,7 @@ export default function Home() {
       }))
     }
 
-    // _debouncedSubmit()
+    _debouncedSubmit()
   }
 
   const minPrice = Math.min(filter.price.range[0], filter.price.range[1])
@@ -166,7 +173,7 @@ export default function Home() {
                       sort: option.value,
                     }))
 
-                    // _debouncedSubmit()
+                    _debouncedSubmit()
                   }}
                 >
                   {option.name}
@@ -289,7 +296,7 @@ export default function Home() {
                               },
                             }))
 
-                            // _debouncedSubmit()
+                            _debouncedSubmit()
                           }}
                           checked={
                             !filter.price.isCustom &&
@@ -320,7 +327,7 @@ export default function Home() {
                               },
                             }))
 
-                            // _debouncedSubmit()
+                            _debouncedSubmit()
                           }}
                           checked={filter.price.isCustom}
                           className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
@@ -363,7 +370,7 @@ export default function Home() {
                             },
                           }))
 
-                          // _debouncedSubmit()
+                          _debouncedSubmit()
                         }}
                         value={
                           filter.price.isCustom
